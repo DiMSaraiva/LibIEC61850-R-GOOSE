@@ -7,7 +7,7 @@
 
 /* 
  * File:   main.cpp
- * Author: volodia
+ * Author: Diogo Saraiva
  *
  * Created on March 16, 2018, 11:29 PM
  */
@@ -35,11 +35,8 @@
 #include<arpa/inet.h>
 #include<sys/socket.h>
 #include <unistd.h>
-
-
 #define BUFLEN 1024  //Max length of buffer
 #define PORT 8888   //The port on which to send data
-
 
 using std::cout;
 using std::endl;
@@ -51,178 +48,21 @@ extern IedModel iedModel;
 static int running = 0;
 static IedServer iedServer = NULL;
 
-//void gooseListener(GooseSubscriber subscriber, void* parameter) {
-//    cout << *(int *) parameter << endl;
-//    if (*(int *) parameter == 0) {
-//        cout << "GOOSE event RPi1 LOCAL-> start DO:\n";
-//        cout << "  stNum: " << GooseSubscriber_getStNum(subscriber) << " sqNum: " << GooseSubscriber_getSqNum(subscriber) << endl;
-//        cout << "  timeToLive: " << GooseSubscriber_getTimeAllowedToLive(subscriber) << endl;
-//
-//        uint64_t timestamp = GooseSubscriber_getTimestamp(subscriber);
-//        cout << "  timestamp: " << (timestamp / 1000) << "." << (timestamp % 1000) << endl;
-//
-//
-//        MmsValue* values = GooseSubscriber_getDataSetValues(subscriber);
-//        MmsValue* value;
-//
-//        DataAttribute * pole[4] = {IEDMODEL_RPi1_LLN0_Loc5_stVal, IEDMODEL_RPi1_LLN0_Loc6_stVal, IEDMODEL_RPi1_LLN0_Loc7_stVal, IEDMODEL_RPi1_LLN0_Loc8_stVal};
-//
-//        for (int i = 12; i < MmsValue_getArraySize(values) - 8; i++) {
-//
-//            value = MmsValue_getElement(MmsValue_getElement(values, i), 0);
-//
-//            bool val = MmsValue_getBoolean(value);
-//
-//            cout << "  LOCAL" << i + 1 << ": " << val << endl;
-//            IedServer_updateBooleanAttributeValue(iedServer, pole[i - 12], val);
-//
-//        }
-//        cout << endl;
-//
-//    } else {
-//        cout << "GOOSE event RPi3 DI:\n";
-//        cout << "  stNum: " << GooseSubscriber_getStNum(subscriber) << " sqNum: " << GooseSubscriber_getSqNum(subscriber) << endl;
-//        cout << "  timeToLive: " << GooseSubscriber_getTimeAllowedToLive(subscriber) << endl;
-//
-//        uint64_t timestamp = GooseSubscriber_getTimestamp(subscriber);
-//        cout << "  timestamp: " << (timestamp / 1000) << "." << (timestamp % 1000) << endl;
-//
-//
-//        MmsValue* values = GooseSubscriber_getDataSetValues(subscriber);
-//        MmsValue* value;
-//
-//        DataAttribute * pole[4] = {IEDMODEL_RPi1_LLN0_Loc1_stVal, IEDMODEL_RPi1_LLN0_Loc2_stVal, IEDMODEL_RPi1_LLN0_Loc3_stVal, IEDMODEL_RPi1_LLN0_Loc4_stVal};
-//
-//        for (int i = 0; i < MmsValue_getArraySize(values); i++) {
-//
-//            value = MmsValue_getElement(MmsValue_getElement(values, i), 0);
-//
-//            bool val = MmsValue_getBoolean(value);
-//
-//            cout << "  DI" << i + 1 << ": " << val << endl;
-//            IedServer_updateBooleanAttributeValue(iedServer, pole[i], val);
-//        }
-//        cout << endl;
-//    }
-//
-//}
-
 void
 sigint_handler(int signalId) {
     running = 0;
 }
 
-//static void
-//connectionHandler (IedServer self, ClientConnection connection, bool connected, void* parameter)
-//{
-//    if (connected)
-//        printf("Connection opened\n");
-//    else
-//        printf("Connection closed\n");
-//}
+
 
 void die(char *s) {
     perror(s);
     exit(1);
 }
 
-/* skip reserved fields */
-
-/*
-bufPos += 4;
-
-int apduLength = length - 8;
-
-if (numbytes < length + headerLength) {
-    if (DEBUG_GOOSE_SUBSCRIBER)
-        printf("GOOSE_SUBSCRIBER: Invalid PDU size\n");
-    return;
-}
-
-if (DEBUG_GOOSE_SUBSCRIBER) {
-    printf("GOOSE_SUBSCRIBER: GOOSE message:\nGOOSE_SUBSCRIBER: ----------------\n");
-    printf("GOOSE_SUBSCRIBER:   APPID: %u\n", appId);
-    printf("GOOSE_SUBSCRIBER:   LENGTH: %u\n", length);
-    printf("GOOSE_SUBSCRIBER:   APDU length: %i\n", apduLength);
-}
-
-// check if there is an interested subscriber
-LinkedList element = LinkedList_getNext(self->subscriberList);
-
-while (element != NULL) {
-    GooseSubscriber subscriber = (GooseSubscriber) LinkedList_getData(element);
-
-    if (subscriber->appId == appId) {
-        subscriberFound = true;
-        break;
-    }
-
-    element = LinkedList_getNext(element);
-}
-
-if (subscriberFound)
-    parseGoosePayload(self, buffer + bufPos, apduLength);
-else {
-    if (DEBUG_GOOSE_SUBSCRIBER)
-        printf("GOOSE_SUBSCRIBER: GOOSE message ignored due to unknown APPID value\n");
-}
- * */
-
 
 int
 main(int argc, char** argv) {
-    /*
-    
-      printf("Using libIEC61850 version %s\n", LibIEC61850_getVersionString());
-
-      iedServer = IedServer_create(&iedModel);
-      IedServer_setGooseInterfaceId(iedServer, "eth0");
-    
-
-
-      IedServer_setConnectionIndicationHandler(iedServer, (IedConnectionIndicationHandler) connectionHandler, NULL);
-
-      /*MMS server will be instructed to start listening to client connections. */
-    /*
-    IedServer_start(iedServer, 102);
-
-    if (!IedServer_isRunning(iedServer)) {
-        printf("Starting server failed! Exit.\n");
-        IedServer_destroy(iedServer);
-        exit(-1);
-    }
-     
-      
-     
-    IedServer_enableGoosePublishing(iedServer);
-    
-    //_______________________________________________________________________________Goose receiver, subscriber
-    GooseReceiver receiver = GooseReceiver_create();
-    GooseReceiver receiver1 = GooseReceiver_create();
-
-    cout<<"GOOSE interface eth0\n";
-    GooseReceiver_setInterfaceId(receiver, "eth0");
-    GooseReceiver_setInterfaceId(receiver1, "eth0");
-
-
-    GooseSubscriber subscriber = GooseSubscriber_create("IEDPiRPi1/LLN0$GO$LOCALname", NULL);
-    GooseSubscriber subscriber1 = GooseSubscriber_create("IEDPiRPi1/LLN0$GO$DIname", NULL);
-
-    GooseSubscriber_setAppId(subscriber, 0x1000);
-    GooseSubscriber_setAppId(subscriber1, 0x1002);
-    int sub = 0;
-    int sub1 = 2;
-    GooseSubscriber_setListener(subscriber, gooseListener, &sub);
-    GooseSubscriber_setListener(subscriber1, gooseListener, &sub1);
-
-    GooseReceiver_addSubscriber(receiver, subscriber);
-    GooseReceiver_addSubscriber(receiver1, subscriber1);
-    /*
-    GooseReceiver_start(receiver);
-    GooseReceiver_start(receiver1);
-     * */
-    //----------------------------------------------------------------------------------------------    
-
 
     struct sockaddr_in si_me, si_other;
 
@@ -249,7 +89,9 @@ main(int argc, char** argv) {
 
     //keep listening for data
     while (1) {
+        cout << endl;
         printf("Waiting for data...");
+        cout << endl << endl;
         fflush(stdout);
 
         //try to receive some data, this is a blocking call
@@ -261,7 +103,9 @@ main(int argc, char** argv) {
 
         //print details of the client/peer and the data received
         printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-        printf("Data: %s\n", buf);
+        cout << endl;
+
+        //printf("Data: %s\n", buf);
 
         //now reply the client with the same data
         if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1) {
@@ -271,68 +115,56 @@ main(int argc, char** argv) {
 
 
         //parseUDP
-        
-        int bufPos = 0;
+        int bufPos = 12;
         uint8_t* buffer = buf;
         int numbytes = recv_len;
-        
-        
-//        cout << "IP1 : " << buffer[27] + "\n" << endl;
-//        cout << "Ip2 : " << buffer[31] + "\n" << endl;
-        
-        //for udp
+
+        //too small
         if (numbytes < 22)
             return 0;
 
-        //print ethernet addressses
-        //        printf("Ethernet receiver: " + buffer[bufPos] + "\n\n");
-        
-//       cout << "Ethernet receiver: " << (buffer[bufPos]*0x100) + "\n" << endl;
-
-        bufPos += 6;
-        //print ethernet addressses
-        //        printf("Ethernet sender: " + buffer[bufPos] + "\n\n");
-//        cout << "Ethernet sender: " << buffer[bufPos] + "\n" << endl;
-
-        bufPos += 6;
-        
-        
         int headerLength = bufPos + 2;
-        cout << "bufPos: " << bufPos << endl ;
-        cout << "headerLength: " << headerLength << endl ;
-//       cout << "conteudo buff: " << int(buffer[bufPos]) << endl ;
-//       cout << "conteudo buff +1 : " << int(buffer[bufPos+1]) << endl ;
+
+        cout << "bufPos: " << bufPos << endl;
+        cout << "headerLength: " << headerLength << endl;
+
 
         /* check for VLAN tag */
         if ((buffer[bufPos] == 0x81) && (buffer[bufPos + 1] == 0x00)) {
-            //            printf("VLAN TAG: " + buffer[bufPos] + "\n\n");
-            cout << "VLAN TAG: " << buffer[bufPos] + "\n" << endl;
+            cout << "VLAN TAG 0x81 0X00" << endl;
             bufPos += 4; /* skip VLAN tag */
             headerLength += 4;
-        }
+        } else
+            cout << "VLAN TAG WRONG!" << endl;
+
 
         /* check for GOOSE Ethertype */
         if (buffer[bufPos++] != 0x88)
-            //            printf("Goose Ethernet type 1: " + buffer[bufPos] + "\n\n");
-            cout << "GOOSE Ethernet type 1: " << buffer[bufPos] + "\n" << endl;
+            cout << "GOOOSE Ethertype different 1 !" << endl;
         if (buffer[bufPos++] != 0xb8)
-            //            printf("Goose Ethernet type 1: " + buffer[bufPos] + "\n\n");
-            cout << "GOOSE Ethernet type 1: " << buffer[bufPos] + "\n" << endl;
-
+            cout << "GOOOSE Ethertype different 2 !" << endl;
+        ;
 
         uint16_t appId;
 
         appId = buffer[bufPos++] * 0x100;
         appId += buffer[bufPos++];
-        //        printf("appID final: " + buffer[bufPos] + "\n\n");
-        cout << "appID final: " << buffer[bufPos] + "\n" << endl;
 
         uint16_t length;
 
         length = buffer[bufPos++] * 0x100;
         length += buffer[bufPos++];
-        //        printf("length final: " + buffer[bufPos] + "\n\n");
-        cout << "length final: " << buffer[bufPos] + "\n" << endl;
+
+        /* skip reserved fields */
+        bufPos += 4;
+
+        int apduLength = length - 8;
+
+
+        //print variables
+        printf("GOOSE_SUBSCRIBER:   APPID: %u\n", appId);
+        printf("GOOSE_SUBSCRIBER:   LENGTH: %u\n", length);
+        printf("GOOSE_SUBSCRIBER:   APDU length: %i\n", apduLength);
 
 
     }
@@ -340,33 +172,5 @@ main(int argc, char** argv) {
     close(s);
 
     return 0;
-
-
-
-
-    /*
-      running = 1;
-
-      signal(SIGINT, sigint_handler);
-          float t = 0.f;
-
-
-
-     */
-    /*
-            Thread_sleep(100);
-    
-  
-        
-        GooseReceiver_stop(receiver);
-        GooseReceiver_destroy(receiver);  
-        GooseReceiver_stop(receiver1);
-        GooseReceiver_destroy(receiver1);     
-
-       /* stop MMS server - close TCP server socket and all client sockets */
-    // IedServer_stop(iedServer);
-
-    /* Cleanup - free all resources */
-    // IedServer_destroy(iedServer);
 
 } /* main() */
