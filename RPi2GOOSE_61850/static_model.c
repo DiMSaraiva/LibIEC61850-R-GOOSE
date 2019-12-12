@@ -4309,44 +4309,42 @@ DataAttribute iedModel_RPi1_GGIO1_AnIn20_t = {
     NULL,
     0};
 
-extern ReportControlBlock iedModel_RPi1_LLN0_reportLocal;
+//extern ReportControlBlock iedModel_RPi1_LLN0_reportLocal;
 //extern ReportControlBlock iedModel_RPi1_LLN0_reportDI;
 //extern ReportControlBlock iedModel_RPi1_LLN0_reportDO;
 
-ReportControlBlock iedModel_RPi1_LLN0_reportLocal = {&iedModel_RPi1_LLN0, "LocalRCB01", "LocalID", false, "LOCAL", 1, 24, 111, 50, 1000, NULL};
+//ReportControlBlock iedModel_RPi1_LLN0_reportLocal = {&iedModel_RPi1_LLN0, "LocalRCB01", "LocalID", false, "LOCAL", 1, 24, 111, 50, 1000, &iedModel_RPi1_LLN0_reportDI};
 //ReportControlBlock iedModel_RPi1_LLN0_reportDI = {&iedModel_RPi1_LLN0, "DIRCB01", "DIID", false, "DI", 1, 24, 111, 50, 1000, &iedModel_RPi1_LLN0_reportDO};
 //ReportControlBlock iedModel_RPi1_LLN0_reportDO = {&iedModel_RPi1_LLN0, "DORCB01", "DOID", false, "DO", 1, 24, 111, 50, 1000, NULL};
 
 
-extern GSEControlBlock iedModel_RPi1_LLN0_gse0;
-//extern GSEControlBlock iedModel_RPi1_LLN0_gse1;
+//extern GSEControlBlock iedModel_RPi1_LLN0_gse0;
+extern GSEControlBlock iedModel_RPi1_LLN0_gse1;
 //extern GSEControlBlock iedModel_RPi1_LLN0_gse2;
 
-static PhyComAddress iedModel_RPi1_LLN0_gse0_address = {
-  4,
-  1,
-  4096,
-  {0x1, 0xc, 0xcd, 0x1, 0x0, 0x0}
-  
-  
-  //{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
-};
-
-GSEControlBlock iedModel_RPi1_LLN0_gse0 = {&iedModel_RPi1_LLN0, "LOCALname", "LOCALid", "LOCAL", 1, false, &iedModel_RPi1_LLN0_gse0_address, -1, -1, NULL};
-
-//static PhyComAddress iedModel_RPi1_LLN0_gse1_address = {
+//static PhyComAddress iedModel_RPi1_LLN0_gse0_address = {
 //  4,
 //  1,
 //  4096,
 //  {0x1, 0xc, 0xcd, 0x1, 0x0, 0x0}
 //};
 //
-//GSEControlBlock iedModel_RPi1_LLN0_gse1 = {&iedModel_RPi1_LLN0, "DIname", "DIid", "DI", 1, false, &iedModel_RPi1_LLN0_gse1_address, -1, -1, &iedModel_RPi1_LLN0_gse2};
-//
+//GSEControlBlock iedModel_RPi1_LLN0_gse0 = {&iedModel_RPi1_LLN0, "LOCALname", "LOCALid", "LOCAL", 1, false, &iedModel_RPi1_LLN0_gse0_address, -1, -1, &iedModel_RPi1_LLN0_gse1};
+
+static PhyComAddress iedModel_RPi1_LLN0_gse1_address = {
+  4,
+  1,
+  4097,
+  {0x1, 0xc, 0xcd, 0x1, 0x0, 0x0}
+    //{0xff, 0xcff, 0xff, 0xff, 0xff, 0xff}
+};
+
+GSEControlBlock iedModel_RPi1_LLN0_gse1 = {&iedModel_RPi1_LLN0, "DIname", "DIid", "DI", 1, false, &iedModel_RPi1_LLN0_gse1_address, -1, -1, NULL};
+
 //static PhyComAddress iedModel_RPi1_LLN0_gse2_address = {
 //  4,
 //  1,
-//  4096,
+//  4097,
 //  {0x1, 0xc, 0xcd, 0x1, 0x0, 0x0}
 //};
 //
@@ -4359,9 +4357,9 @@ GSEControlBlock iedModel_RPi1_LLN0_gse0 = {&iedModel_RPi1_LLN0, "LOCALname", "LO
 IedModel iedModel = {
     "IEDPi",
     &iedModel_RPi1,
-    &iedModelds_RPi1_LLN0_LOCAL,
-    &iedModel_RPi1_LLN0_reportLocal,
-    &iedModel_RPi1_LLN0_gse0,
+    &iedModelds_RPi1_LLN0_DI,
+    NULL,
+    &iedModel_RPi1_LLN0_gse1,
     NULL,
     NULL,
     NULL,

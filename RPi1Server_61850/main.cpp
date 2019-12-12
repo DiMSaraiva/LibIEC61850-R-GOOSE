@@ -1,27 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /* 
  * File:   main.cpp
- * Author: volodia
- *
- * Created on May 1, 2018, 10:20 AM
- */
+ * Author: Diogo Saraiva
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   main.cpp
- * Author: volodia
- *
- * Created on March 16, 2018, 11:29 PM
  */
 #include <goose_receiver.h>
 #include <goose_subscriber.h>
@@ -40,18 +21,6 @@
 
 #include "static_model.h"
 
-//RGoose
-#include<stdio.h> //printf
-#include<string.h> //memset
-#include<stdlib.h> //exit(0);
-#include<arpa/inet.h>
-#include<sys/socket.h>
-#include <unistd.h>
- 
-#define SERVER "192.168.1.4"
-#define BUFLEN 512  //Max length of buffer
-#define PORT 8888   //The port on which to send data
-
 using std::cout;
 using std::endl;
 using std::cin;
@@ -62,8 +31,8 @@ extern IedModel iedModel;
 static int running = 0;
 static IedServer iedServer = NULL;
 
-uint64_t previousOne = 0;
-uint64_t result = 0;
+uint64_t previousTime = 0;
+uint64_t resultTime = 0;
 uint64_t actualTime = 0;
 
 void
@@ -71,63 +40,12 @@ sigint_handler(int signalId) {
     running = 0;
 }
 
-
-void die(char *s) {
-    perror(s);
-    exit(1);
-}
-
-void RGoose(GooseSubscriber subscriber) {
-    struct sockaddr_in si_other;
-    int s, i, slen = sizeof (si_other);
-    char buf[BUFLEN];
-    char message[BUFLEN];
-
-    if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
-        die("socket");
-    }
-
-    memset((char *) &si_other, 0, sizeof (si_other));
-    si_other.sin_family = AF_INET;
-    si_other.sin_port = htons(PORT);
-
-    if (inet_aton(SERVER, &si_other.sin_addr) == 0) {
-        fprintf(stderr, "inet_aton() failed\n");
-        exit(1);
-    }
-
-/*
-    printf("Enter message : ");
-    gets(message);
-*/
-    //send the message
-
-   cout << "Tamanho do subscriber "<< sizeof(subscriber) <<":\n";
-    if (sendto(s, (GooseSubscriber *) &subscriber, sizeof(subscriber), 0, (struct sockaddr *) &si_other, slen) == -1) {
-        die("Failed to sendto()");
-    }
-     cout << "  Está a funcionar: " << endl << endl;
-
-    //receive a reply and print it
-    //clear the buffer by filling null, it might have previously received data
-    memset(buf, '\0', BUFLEN);
-    //try to receive some data, this is a blocking call
-    //if (recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) == -1) {
-  //      die("recvfrom()");
-    //}
-
-    puts(buf);
-
-
-    close(s);
-}
-
 //________________________________________________________________GOOSE subscriber
 
 void gooseListener(GooseSubscriber subscriber, void* parameter) {
-    cout << *(int *) parameter << endl;
+//    cout << *(int *) parameter << endl;
     if (*(int *) parameter == 1) {
-        RGoose(subscriber);
+//        RGoose(subscriber);
         cout << "GOOSE event RPi2 DI:\n";
         cout << "  stNum: " << GooseSubscriber_getStNum(subscriber) << " sqNum: " << GooseSubscriber_getSqNum(subscriber) << endl;
         cout << "  timeToLive: " << GooseSubscriber_getTimeAllowedToLive(subscriber) << endl;
@@ -151,11 +69,10 @@ void gooseListener(GooseSubscriber subscriber, void* parameter) {
             IedServer_updateBooleanAttributeValue(iedServer, pole[i], val);
 
         }
-        cout << endl;
         actualTime = Hal_getTimeInMs();
-        result = actualTime - previousOne;
-        previousOne = actualTime;
-        cout << "valor da diferença: " << result << endl;
+        resultTime = actualTime - previousTime;
+        previousTime = actualTime;
+        cout << "Value since last GOOSE message received (in ms): " << resultTime << endl <<endl <<endl;
 
     } else {
         cout << "GOOSE event RPi3 DI:\n";
@@ -428,14 +345,16 @@ main(int argc, char** argv) {
     printf("Using libIEC61850 version %s\n", LibIEC61850_getVersionString());
 
     iedServer = IedServer_create(&iedModel);
-    IedServer_setGooseInterfaceId(iedServer, "eth0");
+    IedServer_setGooseInterfaceId(iedServer, "tap0");
 
     //    /* Set the base path for the MMS file services */
     //    MmsServer mmsServer = IedServer_getMmsServer(iedServer);
     //    MmsServer_setFilestoreBasepath(mmsServer, "./vmd-filestore/");
-
-
-
+    //novo teste
+    //teste2
+       
+    
+    
     /* Install handler for operate command */
     IedServer_setControlHandler(iedServer, IEDMODEL_RPi1_GGIO1_SPCSO1,
             (ControlHandler) controlHandlerForBinaryOutput,
@@ -480,7 +399,8 @@ main(int argc, char** argv) {
         IedServer_destroy(iedServer);
         exit(-1);
     }
-
+    
+    
 
     IedServer_enableGoosePublishing(iedServer);
 
@@ -488,9 +408,9 @@ main(int argc, char** argv) {
     GooseReceiver receiver = GooseReceiver_create();
     GooseReceiver receiver1 = GooseReceiver_create();
 
-    cout << "GOOSE interface eth0\n";
-    GooseReceiver_setInterfaceId(receiver, "eth0");
-    GooseReceiver_setInterfaceId(receiver1, "eth0");
+    cout << "GOOSE interface tap0\n";
+    GooseReceiver_setInterfaceId(receiver, "tap0");
+    GooseReceiver_setInterfaceId(receiver1, "tap0");
 
 
     GooseSubscriber subscriber = GooseSubscriber_create("IEDPiRPi1/LLN0$GO$DIname", NULL);
@@ -509,12 +429,11 @@ main(int argc, char** argv) {
     GooseReceiver_start(receiver);
     GooseReceiver_start(receiver1);
     //----------------------------------------------------------------------------------------------   
-
+    
     running = 1;
 
     signal(SIGINT, sigint_handler);
     float t = 0.f;
-
 
     wiringPiSetup();
     pinMode(2, OUTPUT);
@@ -525,7 +444,7 @@ main(int argc, char** argv) {
     pinMode(27, INPUT);
     pinMode(28, INPUT);
     pinMode(29, INPUT);
-
+    
     //
     //___________________________________________________________________________Loop
     //
@@ -534,7 +453,6 @@ main(int argc, char** argv) {
         uint64_t timestamp = Hal_getTimeInMs();
 
         //cout<<"Teste msecs : "<< timestamp << endl;
-
 
         //
         //_______________________________________________________________________Write Analogs
@@ -551,20 +469,9 @@ main(int argc, char** argv) {
         if (((int) t % 2) == 0)
             Timestamp_setClockNotSynchronized(&iecTimestamp, true);
 
-        //        IedServer_updateTimestampAttributeValue(iedServer, IEDMODEL_RPi1_GGIO1_AnIn1_t, &iecTimestamp);
-        //        IedServer_updateFloatAttributeValue(iedServer, IEDMODEL_RPi1_GGIO1_AnIn1_mag_f, an1);
-        //
-        //        IedServer_updateTimestampAttributeValue(iedServer, IEDMODEL_RPi1_GGIO1_AnIn2_t, &iecTimestamp);
-        //        IedServer_updateFloatAttributeValue(iedServer, IEDMODEL_RPi1_GGIO1_AnIn2_mag_f, an2);
-        //
-        //        IedServer_updateTimestampAttributeValue(iedServer, IEDMODEL_RPi1_GGIO1_AnIn3_t, &iecTimestamp);
-        //        IedServer_updateFloatAttributeValue(iedServer, IEDMODEL_RPi1_GGIO1_AnIn3_mag_f, an3);
-        //
-        //        IedServer_updateTimestampAttributeValue(iedServer, IEDMODEL_RPi1_GGIO1_AnIn4_t, &iecTimestamp);
-        //        IedServer_updateFloatAttributeValue(iedServer, IEDMODEL_RPi1_GGIO1_AnIn4_mag_f, an4);
 
-
-
+        cout<<endl;
+       // cout<<"Main running, no interruption!"<<endl;;
 
 
         if (IedServer_getBooleanAttributeValue(iedServer, IEDMODEL_RPi1_GGIO1_Ind1_stVal) != digitalRead(26)) {
@@ -620,8 +527,6 @@ main(int argc, char** argv) {
 
         //______________________________________________________________________________________________________//Write//
         //
-        //_______________________________________________________________________Vypis hodnot vstupu
-        //        
         //        float value;
         //        
         //        value = IedServer_getFloatAttributeValue(iedServer,IEDMODEL_RPi1_GGIO1_AnIn1_mag_f);        
@@ -658,7 +563,7 @@ main(int argc, char** argv) {
         //        cout<<"Ind4: "<<value<<endl;
         //        value = NULL;        
 
-        Thread_sleep(100);
+        Thread_sleep(5000);
 
     }
 
